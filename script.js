@@ -3,37 +3,29 @@ const display = document.querySelector('.display');
 const MAX_LENGTH = 13;
 let valorAnterior = null;
 let operacaoAtual = null;
-let novaEntrada = true; // controla se o próximo caractere deve limpar o display
+let novaEntrada = true;
 
 function adicionarCaracter(caracter) {
     const operadores = ['+', '-', '*', '/', '%'];
 
-    // Limita o tamanho do display para números (não limita operadores)
     if (!operadores.includes(caracter) && display.value.length >= MAX_LENGTH && !novaEntrada) {
-        return; // não deixa digitar mais que MAX_LENGTH caracteres
+        return;
     }
 
-    // Se estiver numa nova entrada e for número ou ponto, limpa o display antes de adicionar
     if (novaEntrada && !operadores.includes(caracter)) {
         display.value = '';
         novaEntrada = false;
     }
 
-    // Se o display estiver com erro ou resultado inválido, limpa antes
-    if (
-        ['Erro', 'Infinity', '-Infinity', 'NaN', 'Valor inválido'].includes(display.value)
-    ) {
+    if (['Erro', 'Infinity', '-Infinity', 'NaN', 'Valor inválido'].includes(display.value)) {
         display.value = '';
     }
 
     if (operadores.includes(caracter)) {
-        if (display.value === '' && caracter !== '-') {
-            // não aceita operador sem número, exceto '-'
-            return;
-        }
+        if (display.value === '' && caracter !== '-') return;
 
         if (valorAnterior !== null && operacaoAtual !== null && !novaEntrada) {
-            calcular();
+            calcular(false); // Faz a operação, mas mantém os valores
         } else {
             valorAnterior = display.value;
         }
@@ -107,7 +99,7 @@ function formatarResultado(numero, maxLength = MAX_LENGTH) {
     return str.slice(0, maxLength);
 }
 
-function calcular() {
+function calcular(reset = true) {
     if (valorAnterior === null || operacaoAtual === null) {
         return;
     }
@@ -167,8 +159,13 @@ function calcular() {
         display.value = formatarResultado(resultado, MAX_LENGTH);
     }
 
-    valorAnterior = null;
-    operacaoAtual = null;
+    if (reset) {
+        valorAnterior = null;
+        operacaoAtual = null;
+    } else {
+        valorAnterior = display.value; // continua com o novo resultado
+    }
+
     novaEntrada = true;
 }
 
